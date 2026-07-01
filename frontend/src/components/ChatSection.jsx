@@ -1,37 +1,65 @@
 import { useState } from "react";
-import API from "../services/api";
+import "./ChatSection.css";
+import { askQuestion } from "../services/api";
+import AnswerCard from "./AnswerCard";
 
 function ChatSection() {
-
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
 
-  const askQuestion = async () => {
+  const handleAsk = async () => {
+    if (!question.trim()) return;
 
-    const res = await API.post("/ask", {
-      question
-    });
+    try {
+      setLoading(true);
 
-    setAnswer(res.data.answer);
+      const response = await askQuestion(question);
+
+      setResult(response);
+
+    } catch (err) {
+      console.error(err);
+
+      alert("Failed to get response.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div>
+    <div className="chat-container">
 
-      <textarea
-        placeholder="Ask your PDF anything..."
-        value={question}
-        onChange={(e) => setQuestion(e.target.value)}
-      />
+      <h2>Ask Your Document</h2>
 
-      <button onClick={askQuestion}>
-        Ask
-      </button>
+      <p className="chat-subtitle">
+        Query your uploaded documents using Corrective RAG
+      </p>
 
-      <div>
-        <h3>Answer</h3>
-        <p>{answer}</p>
+      <div className="chat-input-area">
+
+        <input
+          type="text"
+          placeholder="Ask anything about your document..."
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+        />
+
+        <button onClick={handleAsk}>
+          {loading ? "Thinking..." : "Ask"}
+        </button>
+
       </div>
+
+      {loading && (
+        <div className="loading">
+          🤖 AI is analyzing your document...
+        </div>
+      )}
+
+      {result && (
+        <AnswerCard result={result} />
+      )}
 
     </div>
   );

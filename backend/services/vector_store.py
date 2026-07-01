@@ -17,12 +17,10 @@ def create_faiss_index(embeddings, chunks):
         dtype="float32"
     )
 
-    # Normalize embeddings for cosine similarity
     faiss.normalize_L2(embeddings)
 
     dimension = embeddings.shape[1]
 
-    # Inner Product + normalized vectors = cosine similarity
     index = faiss.IndexFlatIP(dimension)
 
     index.add(embeddings)
@@ -45,7 +43,6 @@ def search_chunks(query_embedding, top_k=5):
         dtype="float32"
     )
 
-    # Normalize query vector
     faiss.normalize_L2(query_embedding)
 
     distances, indices = index.search(
@@ -55,14 +52,26 @@ def search_chunks(query_embedding, top_k=5):
 
     results = []
 
-    for idx in indices[0]:
+    print("\n========== RETRIEVED CHUNKS ==========\n")
 
-        if (
-            idx >= 0 and
-            idx < len(stored_chunks)
-        ):
-            results.append(
-                stored_chunks[idx]
-            )
+    for rank, (score, idx) in enumerate(zip(distances[0], indices[0]), start=1):
+
+        if 0 <= idx < len(stored_chunks):
+
+            print(f"Rank : {rank}")
+            print(f"Chunk ID : {idx + 1}")
+            print(f"Similarity Score : {score:.4f}")
+            print(stored_chunks[idx][:200])
+            print("-" * 60)
+
+            results.append({
+
+                "chunk_id": idx + 1,
+
+                "similarity": float(score),
+
+                "text": stored_chunks[idx]
+
+            })
 
     return results
