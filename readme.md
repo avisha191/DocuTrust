@@ -134,7 +134,7 @@ DocuTrust
 ### Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/DocuTrust.git
+git clone https://github.com/avisha191/DocuTrust.git
 ```
 
 ---
